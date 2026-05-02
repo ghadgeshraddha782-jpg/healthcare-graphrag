@@ -1,0 +1,12 @@
+USE GRAPH HealthcareGraph
+
+CREATE QUERY get_disease_from_symptom(STRING symptom_name) FOR GRAPH HealthcareGraph {
+
+    Start = {Symptom.*};
+
+    Result = SELECT d
+             FROM Start:s -(has_symptom:e)- Disease:d
+             WHERE s.name == symptom_name;
+
+    PRINT Result;
+}

@@ -1,0 +1,12 @@
+USE GRAPH HealthcareGraph
+
+CREATE LOADING JOB load_healthcare_data FOR GRAPH HealthcareGraph {
+
+    DEFINE FILENAME file1 = "symptom_disease_graph.csv";
+
+    LOAD file1 TO VERTEX Symptom VALUES ($"symptom", $"symptom") USING SEPARATOR=",", HEADER="true";
+
+    LOAD file1 TO VERTEX Disease VALUES ($"disease", $"disease") USING SEPARATOR=",", HEADER="true";
+
+    LOAD file1 TO EDGE has_symptom VALUES ($"disease", $"symptom") USING SEPARATOR=",", HEADER="true";
+}

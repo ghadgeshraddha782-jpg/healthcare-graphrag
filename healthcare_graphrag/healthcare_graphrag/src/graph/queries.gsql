@@ -1,0 +1,42 @@
+// queries.gsql
+// Installed queries for HealthcareGraph.
+
+USE GRAPH HealthcareGraph
+
+// ── Query 1: Get diseases that share the most symptoms with input list ──
+CREATE QUERY getDiseasesBySymptoms(SET<STRING> symptoms, INT topK = 5) FOR GRAPH HealthcareGraph {
+    /*
+     * Returns the top-K diseases ranked by how many of the
+     * given symptoms they have in common.
+     */
+    MapAccum<VERTEX<Disease>, INT> @@diseaseScore;
+    SetAccum<STRING>               @matchedSymptoms;
+
+    // Start from the provided symptoms
+    Seeds = {Symptom.*};
+    Matched = SELECT s
+              FROM Seeds:s
+              WHERE s.symptom_id IN symptoms;
+
+    // Walk edges Disease <-- has_symptom -- Symptom (reverse traversal)
+    Diseases = SELECT d
+               FROM Matched:s -(has_symptom:e)- Disease:d
+               ACCUM @@diseaseScore += (d -> 1),
+                     d.@matchedSymptoms += s.name
+               ORDER BY @@diseaseScore DESC
+               LIMIT topK;
+
+    PRINT Diseases[Diseases.name, Diseases.@matchedSymptoms];
+}
+
+// ── Query 2: Get all symptoms for a specific disease ──────────────────
+CREATE QUERY getSymptomsForDisease(STRING diseaseName) FOR GRAPH HealthcareGraph {
+    Seed     = {Disease.*};
+    Diseases = SELECT d FROM Seed:d WHERE d.name == diseaseName;
+    Symptoms = SELECT s FROM Diseases:d -(has_symptom:e)- Symptom:s;
+    PRINT Symptoms[Symptoms.name];
+}
+
+// ── Install all queries ──────────────────────────────────────────────
+INSTALL QUERY getDiseasesBySymptoms
+INSTALL QUERY getSymptomsForDisease

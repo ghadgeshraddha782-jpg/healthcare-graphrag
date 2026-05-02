@@ -1,0 +1,29 @@
+// schema.gsql
+// Defines the HealthcareGraph schema in TigerGraph.
+// Vertex types: Symptom, Disease
+// Edge type  : has_symptom (Disease → Symptom)
+
+CREATE GRAPH HealthcareGraph()
+
+USE GRAPH HealthcareGraph
+
+// ── Vertex Types ────────────────────────────────────────────────
+CREATE VERTEX Symptom (
+    PRIMARY_ID symptom_id STRING,
+    name       STRING
+) WITH primary_id_as_attribute="true"
+
+CREATE VERTEX Disease (
+    PRIMARY_ID disease_id STRING,
+    name       STRING
+) WITH primary_id_as_attribute="true"
+
+// ── Edge Type ────────────────────────────────────────────────────
+// Direction: Disease --has_symptom--> Symptom
+CREATE DIRECTED EDGE has_symptom (
+    FROM Disease,
+    TO   Symptom
+)
+
+// Apply schema changes
+INSTALL QUERY ALL

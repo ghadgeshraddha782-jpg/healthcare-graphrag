@@ -1,0 +1,9 @@
+CREATE VERTEX Symptom (PRIMARY_ID name STRING, name STRING)
+CREATE VERTEX Disease (PRIMARY_ID name STRING, name STRING)
+
+CREATE UNDIRECTED EDGE has_symptom (
+    FROM Disease,
+    TO Symptom
+)
+
+CREATE GRAPH HealthcareGraph (Symptom, Disease, has_symptom)
